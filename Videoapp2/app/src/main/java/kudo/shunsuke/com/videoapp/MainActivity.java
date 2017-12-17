@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 String path = uri1.getPath();
                 Uri uri2 = contentUri[1];
                 String path1 = uri2.getPath();
-//try文を使用
+//try文を使用したよ
                 try {
                     Movie[] inMovies = new Movie[]{
                             MovieCreator.build(path),
