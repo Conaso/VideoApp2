@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -70,16 +71,17 @@ public class MainActivity extends AppCompatActivity {
         // ほりー参上
 //intentで複数の動画を持ってきた、かつ、それが成功した時、
         if (requestCode == RESULT_PICK_VIDEOFILE && resultCode == Activity.RESULT_OK) {
+
+
             //何もなくする。
             Uri uri = null;
 
             //データが何かあった時、。
             if (data != null) {
-
-
                 //データの中から選択したデータを留める。
                 ClipData clip = data.getClipData();
 
+                //データが何もなかった時、、
                 if (clip == null) {
                     Toast.makeText(getApplicationContext(), "Clip is nothing", Toast.LENGTH_SHORT).show();
                     return;
@@ -89,21 +91,24 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < clip.getItemCount(); i++) {
                     contentUri[i] = clip.getItemAt(i).getUri();
                 }
-                //URIというファイルで再生している
+
+                //URIというファイルで再生している(データを持ってきた時の通行書(path)をもらってる。)
                 videoView.setVideoURI(contentUri[0]);
                 Uri uri1 = contentUri[0];
                 String path = uri1.getPath();
                 Uri uri2 = contentUri[1];
                 String path1 = uri2.getPath();
-//try文を使用したよ
+
+//try文を使用したよ～　（↓ここ成功してない。↑はOK）
                 try {
                     Movie[] inMovies = new Movie[]{
                             MovieCreator.build(path),
                             MovieCreator.build(path1)};
-
+                    //↑の部分に問題あり？
                     List<Track> videoTracks = new LinkedList<Track>();
                     List<Track> audioTracks = new LinkedList<Track>();
                     for (Movie m : inMovies) {
+                        Log.e("tag","成功");
                         for (Track t : m.getTracks()) {
                             if (t.getHandler().equals("soun")) {
                                 audioTracks.add(t);
@@ -113,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                     }
+
                     Movie result = new Movie();
                     if (audioTracks.size() > 0) {
                         result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
@@ -129,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                     fos.close();
 
                         }catch(Exception e){
-
+                       //ここに何か書く予定
                         }
                     }
                 }
