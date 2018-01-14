@@ -3,10 +3,14 @@ package kudo.shunsuke.com.videoapp;
 
 import android.app.Activity;
 import android.content.ClipData;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Path;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
     private VideoView videoView;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -45,21 +47,21 @@ public class MainActivity extends AppCompatActivity {
         videoView = (VideoView) findViewById(R.id.videoView);
     }
 
-    public void showGallery(View v){
+    public void showGallery(View v) {
 
         Intent intent = new Intent();
 //        intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("video/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Movie"), RESULT_PICK_VIDEOFILE);
     }
 
-    public void startVideo(View v){
+    public void startVideo(View v) {
         videoView.start();
     }
 
-    public void stopVideo(View v){
+    public void stopVideo(View v) {
         videoView.pause();
     }
 
@@ -68,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        // ほりー参上
 //intentで複数の動画を持ってきた、かつ、それが成功した時、
         if (requestCode == RESULT_PICK_VIDEOFILE && resultCode == Activity.RESULT_OK) {
 
@@ -95,12 +96,16 @@ public class MainActivity extends AppCompatActivity {
                 //URIというファイルで再生している(データを持ってきた時の通行書(path)をもらってる。)
                 videoView.setVideoURI(contentUri[0]);
                 Uri uri1 = contentUri[0];
-                String path = uri1.getPath();
+                String path = getPath(this, uri1);
                 Uri uri2 = contentUri[1];
-                String path1 = uri2.getPath();
+                String path1 = getPath(this, uri2);
 
 //try文を使用したよ～　（↓ここ成功してない。↑はOK）
                 try {
+
+                    Log.e("TAG", path);
+                    Log.e("TAG", path1);
+                    //動画を読み込む部分
                     Movie[] inMovies = new Movie[]{
                             MovieCreator.build(path),
                             MovieCreator.build(path1)};
@@ -108,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
                     List<Track> videoTracks = new LinkedList<Track>();
                     List<Track> audioTracks = new LinkedList<Track>();
                     for (Movie m : inMovies) {
-                        Log.e("tag","成功");
                         for (Track t : m.getTracks()) {
                             if (t.getHandler().equals("soun")) {
                                 audioTracks.add(t);
@@ -134,12 +138,24 @@ public class MainActivity extends AppCompatActivity {
                     out.writeContainer(fos.getChannel());
                     fos.close();
 
-                        }catch(Exception e){
-                       //ここに何か書く予定
-                        }
-                    }
+                } catch (Exception e) {
+
+                    Log.e("TAG", e.toString());
                 }
             }
+        }
+    }
+
+    public static String getPath(Context context, Uri uri) {
+        ContentResolver contentResolver = context.getContentResolver();
+        String[] columns = {MediaStore.Images.Media.DATA};
+        Cursor cursor = contentResolver.query(uri, columns, null, null, null);
+        cursor.moveToFirst();
+        String path = cursor.getString(0);
+        cursor.close();
+        return path;
+    }
+
 
 }
 
