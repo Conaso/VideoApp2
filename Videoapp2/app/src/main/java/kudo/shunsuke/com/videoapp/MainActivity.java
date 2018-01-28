@@ -21,14 +21,18 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.coremedia.iso.boxes.Container;
+import com.googlecode.mp4parser.FileDataSourceImpl;
 import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.Mp4TrackImpl;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
+import com.googlecode.mp4parser.authoring.tracks.h264.H264TrackImpl;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -106,37 +110,45 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("TAG", path);
                     Log.e("TAG", path1);
                     //動画を読み込む部分
-                    Movie[] inMovies = new Movie[]{
-                            MovieCreator.build(path),
-                            MovieCreator.build(path1)};
-                    //↑の部分に問題あり？
-                    List<Track> videoTracks = new LinkedList<Track>();
-                    List<Track> audioTracks = new LinkedList<Track>();
-                    for (Movie m : inMovies) {
-                        for (Track t : m.getTracks()) {
-                            if (t.getHandler().equals("soun")) {
-                                audioTracks.add(t);
-                            }
-                            if (t.getHandler().equals("vide")) {
-                                videoTracks.add(t);
-                            }
-                        }
-                    }
+                    Movie result =new  Movie();
+                    H264TrackImpl mp4 = new H264TrackImpl(new FileDataSourceImpl(path));
+                    H264TrackImpl mp4_2 = new H264TrackImpl((new FileDataSourceImpl(path1)));
 
-                    Movie result = new Movie();
-                    if (audioTracks.size() > 0) {
-                        result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
-                    }
-                    if (videoTracks.size() > 0) {
-                        result.addTrack(new AppendTrack(videoTracks.toArray(new Track[videoTracks.size()])));
-                    }
+                    result.addTrack(mp4);
+                    result.addTrack(mp4_2);
 
+
+//                    //↑の部分に問題あり？
+//                    List<Track> videoTracks = new LinkedList<Track>();
+//                    List<Track> audioTracks = new LinkedList<Track>();
+//                    for (Movie m : movie) {
+//                        for (Track t : m.getTracks()) {
+//                            if (t.getHandler().equals("soun")) {
+//                                audioTracks.add(t);
+//                            }
+//                            if (t.getHandler().equals("vide")) {
+//                                videoTracks.add(t);
+//                            }
+//                        }
+//                    }
+//
+//                    Movie result = new Movie();
+//                    if (audioTracks.size() > 0) {
+//                        result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
+//                    }
+//                    if (videoTracks.size() > 0) {
+//                        result.addTrack(new AppendTrack(videoTracks.toArray(new Track[videoTracks.size()])));
+//                    }
+//
+//                    */
 
                     Container out = new DefaultMp4Builder().build(result);
                     String outputFilePath = Environment.getExternalStorageDirectory() + "/output_append.mp4";
                     FileOutputStream fos = new FileOutputStream(new File(outputFilePath));
                     out.writeContainer(fos.getChannel());
                     fos.close();
+
+                    videoView.setVideoURI(Uri.fromFile(getFileStreamPath(fos.toString())));
 
                 } catch (Exception e) {
 
@@ -150,6 +162,9 @@ public class MainActivity extends AppCompatActivity {
         ContentResolver contentResolver = context.getContentResolver();
         String[] columns = {MediaStore.Images.Media.DATA};
         Cursor cursor = contentResolver.query(uri, columns, null, null, null);
+        if (cursor == null) {
+            return "";
+        }
         cursor.moveToFirst();
         String path = cursor.getString(0);
         cursor.close();
