@@ -99,7 +99,14 @@ public class MainActivity extends AppCompatActivity {
 //何かに新しいカウントをする項目を留める
                 Uri[] contentUri = new Uri[clip.getItemCount()];
                 for (int i = 0; i < clip.getItemCount(); i++) {
+                    //Clipdateの配列からuriの配列にfor文で変えた。
                     contentUri[i] = clip.getItemAt(i).getUri();
+                }
+
+                String[] contentpath = new String[clip.getItemCount()];
+                for (int i = 0;  i < clip.getItemCount() ; i++){
+                    //uriの配列からStringの配列に変えた。
+                    contentpath[i] = getPath(this,contentUri[i]);
                 }
 
                 //URIというファイルで再生している(データを持ってきた時の通行書(path)をもらってる。)
