@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //データが何もなかった時、、
                 if (clip == null) {
-                    Toast.makeText(getApplicationContext(), "Clip is nothing", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "2つ以上、動画を選んでね♥", Toast.LENGTH_SHORT).show();
                     return;
                 }
 //何かに新しいカウントをする項目を留める
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String[] contentpath = new String[clip.getItemCount()];
                 for (int i = 0;  i < clip.getItemCount() ; i++){
-                    //uriの配列からStringの配列に変えた。
+                    //uriの配列からString(path)の配列に変えた。
                     contentpath[i] = getPath(this,contentUri[i]);
                 }
 
@@ -122,9 +122,15 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("TAG", path1);
                     //動画を読み込む部分
 
-                    Movie[] movies = new Movie[]{
-                            MovieCreator.build(path),
-                            MovieCreator.build(path1)};
+                   // Movie[] movies = new Movie[]{
+                           // MovieCreator.build(path),
+                           // MovieCreator.build(path1)};
+                    Movie[] movies = new Movie[clip.getItemCount()];
+                    for (int i = 0; i < clip.getItemCount(); i++){
+                        movies[i] = MovieCreator.build(contentpath[i]);
+                    }
+
+
                     List<Track> videoTracks = new LinkedList<Track>();
                     for (Movie m : movies) {
 //                        Track audioTrack = m.getTracks().get(1);
